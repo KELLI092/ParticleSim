@@ -3,15 +3,15 @@ close all;
 figure
 ax = axes;
 
-timesteps = 1:40:length(t);
+timesteps = round(length(t)/5):100:length(t);
 
 M(length(timesteps)) = struct('cdata',[],'colormap',[]);
 
-plot(ax,wall(:,1),wall(:,2))
-set(ax,'XLim',[0 15],'YLim',[0 15])
+plot(ax,wall(:,1),wall(:,2),'LineWidth',1)
+set(ax,'XLim',xbounds,'YLim',ybounds)
 grid on
 set(gcf,"Position",[400 200 1100 1000])
-h = animatedline(ax,'Color',[0 0 0],'LineStyle','none','Marker','.','MarkerSize',15);
+h = animatedline(ax,'Color',[0 0 0],'LineStyle','none','Marker','.','MarkerSize',6);
 for i = 1:length(timesteps)
     clearpoints(h)
     addpoints(h,r_t(:,1,timesteps(i)),r_t(:,2,timesteps(i)))
