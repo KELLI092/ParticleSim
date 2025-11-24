@@ -7,12 +7,15 @@ dt = 1e-6;
 start_time = 0;
 end_time = 0.04;
 
+Sim = matfile('Sim.mat');
+
 tlen = round((end_time-start_time)/dt);             % number of timesteps
-N = 25000;                                           % number of particles
+N = 50000;                                           % number of particles
 r_t = zeros(N,2,2);                        % init 3D mat for particle locs
 rands = rand(N,1)*2*pi;
 V_inf = 7800;
 V_temp = 990;
+
 
 r_t(:,:,1) = [rand(N,1)*7-2,rand(N,1)*14+0.5];      % initial positions
 V = [V_inf+V_temp*cos(rands),V_temp*sin(rands)];    % initial velocities
@@ -69,7 +72,7 @@ plot(ax,wall(:,1),wall(:,2),'LineWidth',1)
 set(ax,'XLim',xbounds,'YLim',ybounds)
 grid on
 set(gcf,"Position",[400 200 144*8 128*8],'Resize','off')
-h = animatedline(ax,'Color',[0 0 0],'LineStyle','none','Marker','.','MarkerSize',5);
+h = animatedline(ax,'Color',[0 0 0],'LineStyle','none','Marker','.','MarkerSize',1);
 
 render_counter = 1;
 
@@ -149,7 +152,8 @@ for i = 1:tlen
         || r_t(part,2,2) >= max(ybounds) + 0.25...
         || r_t(part,2,2) <= min(ybounds) - 0.25
             r_t(part,:,2) = [rand(1,1)*2-1, rand(1,1)*14+0.5];
-            V(part,:) = [rand(1,1)+7.5,rand(1,1)*2-1]*1e3;
+            randomnum = rand(1,1)*2*pi;
+            V(part,:) = [V_inf+V_temp*cos(randomnum),V_temp*sin(randomnum)];
             bounced(part) = 2;
         end
         % if the particle's bounce counter is non-zero, decrement
@@ -181,7 +185,7 @@ end
 clearvars("last_rxw","rxw","V","wall_cross_matrix","bounced","r_t")
 
 
-vid = VideoWriter('simandrender','MPEG-4');
+vid = VideoWriter('simandrender','Uncompressed AVI');
 vid.FrameRate = 60;
 open(vid)
 writeVideo(vid,M.movie)
