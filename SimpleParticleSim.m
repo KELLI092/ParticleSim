@@ -6,12 +6,12 @@ ybounds = [0 3];
 ship_start = 1;
 dt = 5e-7;
 start_time = 0;
-end_time = 0.02;
+end_time = 0.015;
 
 %Sim = matfile('Sim.mat');
 
 tlen = round((end_time-start_time)/dt);             % number of timesteps
-N = 1e5;                                          % number of particles
+N = 5e5;                                          % number of particles
 r_t = zeros(N,2,2);                        % init 3D mat for particle locs
 rands = rand(N,1)*2*pi;
 V_inf = 7800;
@@ -44,7 +44,7 @@ wall = [0 0;
 %wall(:,2) = wall(:,2) - 2;
 num_walls = length(wall) - 1;                       % number of walls
 wall = wall + ones(num_walls + 1,2) .* [ship_start, 1.5];
-wall_cross_matrix = zeros(N,3,num_walls);           % setup wall vector mat
+wall_cross_matrix = zeros(N,2,num_walls);           % setup wall vector mat
 wall_angle = zeros(num_walls,1);                    % setup wall angle mat
 
 for i = 1:num_walls                                 % populate angle and cross mats
@@ -78,8 +78,9 @@ ax = axes;
 
 real_time = 20;
 
+frac = 1/3;
 l = tlen;
-timesteps = round(l/2):round(0.5*l/(real_time*60)):l;
+timesteps = round((1 - frac) * l):round(frac*l/(real_time*60)):l;
 timesteps = [timesteps, -1];
 
 delete('M.mat')
@@ -127,26 +128,28 @@ for i = 1:tlen
 
                 % if it has, check the angle between the particle and
                 % the wall
-                theta = asin(norm(cross([V(part,:),0],wall_cross_matrix(1,:,wi))) ...
+                theta = asin(norm(V(part,1)*wall_cross_matrix(1,2,wi) - ...
+                                  V(part,2)*wall_cross_matrix(1,1,wi))...
+                    ...%cross([V(part,:),0],wall_cross_matrix(1,:,wi))) ...
                            /(norm(V(part,:))*norm(wall_cross_matrix(1,:,wi))));
 
                 % do some magic to make sure the angle is right (I kind
                 % of grinded plotting this stuff in desmos until my
                 % math and logic were correct and things worked right)
                 if rxw(part,wi) >= 0
-                    if dot([V(part,:),0],wall_cross_matrix(1,:,wi)) < 0
-                        theta = -2*theta;
+                    if dot(V(part,:),wall_cross_matrix(1,:,wi)) < 0
+                        theta = -2*theta - abs(normrnd(0,0.2));
                     else
-                        theta = 2*theta;
+                        theta = 2*theta + abs(normrnd(0,0.2));
                     end
                 else
-                    if dot([V(part,:),0],wall_cross_matrix(1,:,wi)) > 0
-                        theta = -2*theta;
+                    if dot(V(part,:),wall_cross_matrix(1,:,wi)) > 0
+                        theta = -2*theta + abs(normrnd(0,0.2));
                     else
-                        theta = 2*theta;
+                        theta = 2*theta - abs(normrnd(0,0.2));
                     end
                 end
-                theta = theta + normrnd(0,0.2);
+                %theta = theta - abs(normrnd(0,0.2));
 
                 % since this is a little bit of a hacky way to
                 % implement collision, the only change to the particle
